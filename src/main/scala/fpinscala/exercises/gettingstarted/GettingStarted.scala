@@ -1,7 +1,10 @@
 package fpinscala.exercises.gettingstarted
 
+import scala.annotation.tailrec
+
 // A comment!
 /* Another comment */
+
 /** A documentation comment */
 object MyProgram:
   def abs(n: Int): Int =
@@ -20,7 +23,7 @@ object MyProgram:
     @annotation.tailrec
     def go(n: Int, acc: Int): Int =
       if n <= 0 then acc
-      else go(n-1, n*acc)
+      else go(n - 1, n * acc)
 
     go(n, 1)
 
@@ -28,12 +31,22 @@ object MyProgram:
   def factorial2(n: Int): Int =
     var acc = 1
     var i = n
-    while (i > 0) { acc *= i; i -= 1 }
+    while (i > 0) {
+      acc *= i;
+      i -= 1
+    }
     acc
 
   // Exercise 1: Write a function to compute the nth fibonacci number
 
-  def fib(n: Int): Int = ???
+  def fib(n: Int): Int =
+    @tailrec
+    def go(n: Int, nth: Int, nMinusOneTh: Int): Int =
+      if n == 0 then nth
+      else go(n - 1, nth + nMinusOneTh, nth)
+
+    go(n, 0, 1)
+
 
   // This definition and `formatAbs` are very similar..
   private def formatFactorial(n: Int) =
@@ -80,7 +93,9 @@ object AnonymousFunctions:
     println(formatResult("increment2", 7, (x) => x + 1))
     println(formatResult("increment3", 7, x => x + 1))
     println(formatResult("increment4", 7, _ + 1))
-    println(formatResult("increment5", 7, x => { val r = x + 1; r }))
+    println(formatResult("increment5", 7, x => {
+      val r = x + 1; r
+    }))
 
 object MonomorphicBinarySearch:
 
@@ -90,8 +105,8 @@ object MonomorphicBinarySearch:
   def findFirst(ss: Array[String], key: String): Int =
     @annotation.tailrec
     def loop(n: Int): Int =
-      // If `n` is past the end of the array, return `-1`
-      // indicating the key doesn't exist in the array.
+    // If `n` is past the end of the array, return `-1`
+    // indicating the key doesn't exist in the array.
       if n >= ss.length then -1
       // `ss(n)` extracts the n'th element of the array `ss`.
       // If the element at `n` is equal to the key, return `n`
@@ -121,26 +136,28 @@ object PolymorphicFunctions:
 
   // Exercise 2: Implement a polymorphic function to check whether
   // an `Array[A]` is sorted
-  def isSorted[A](as: Array[A], gt: (A, A) => Boolean): Boolean = ???
+  def isSorted[A](as: Array[A], gt: (A, A) => Boolean): Boolean =
+    if as.length <= 1 then return true
+    else !gt(as(0), as(1)) && isSorted(as.slice(1, as.length), gt)
 
   // Polymorphic functions are often so constrained by their type
   // that they only have one implementation! Here's an example:
 
-  def partial1[A,B,C](a: A, f: (A, B) => C): B => C =
+  def partial1[A, B, C](a: A, f: (A, B) => C): B => C =
     (b: B) => f(a, b)
 
   // Exercise 3: Implement `curry`.
 
   // Note that `=>` associates to the right, so we could
   // write the return type as `A => B => C`
-  def curry[A,B,C](f: (A, B) => C): A => (B => C) =
-    ???
+  def curry[A, B, C](f: (A, B) => C): A => (B => C) =
+    (a: A) => ((b: B) => f(a, b))
 
   // NB: The `Function2` trait has a `curried` method already
 
   // Exercise 4: Implement `uncurry`
-  def uncurry[A,B,C](f: A => B => C): (A, B) => C =
-    ???
+  def uncurry[A, B, C](f: A => B => C): (A, B) => C =
+    (a: A, b: B) => f(a)(b)
 
   /*
   NB: There is a method on the `Function` object in the standard library,
@@ -154,6 +171,6 @@ object PolymorphicFunctions:
 
   // Exercise 5: Implement `compose`
 
-  def compose[A,B,C](f: B => C, g: A => B): A => C =
-    ???
+  def compose[A, B, C](f: B => C, g: A => B): A => C =
+    (a: A) => f(g(a))
 
